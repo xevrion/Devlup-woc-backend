@@ -8,6 +8,7 @@ from models.Idea import Idea
 from models.User import User
 from models.Mentor import Mentor
 from models.Proposal import Proposal
+from models.Admin import Admin
 from config.database import collection_projects
 from config.database import collection_timeline,collection_mentors,collection_ideas,collection_programs,collection_proposals,collection_progress
 from config.database import collection_users
@@ -495,3 +496,13 @@ async def update_project_progress(request:Request):
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+@route.get("/get_max_project_count")
+async def get_max_project_count():
+    return {"max_project_count": Admin.max_project_count}
+
+@route.put("/set_max_project_count",dependencies=[Depends(role_required(["scrummaster"]))])
+async def set_max_project_count(request: Request):
+    data = await request.json()
+    Admin.max_project_count = data["max_project_count"]
+    return {"max_project_count": Admin.max_project_count}
