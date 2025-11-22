@@ -2,12 +2,12 @@ from pydantic import BaseModel
 
 class Project(BaseModel):
     id: str
-    mentorid: str
+    mentorid: list[str]
     title: str
     tag:str
     technology: str
     description: str
-    mentor:str
+    mentor: list[str]
     completed:bool=False
     mentee:list[str]=[]
     codelink: str = ""
