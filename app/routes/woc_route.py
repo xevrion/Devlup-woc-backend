@@ -9,6 +9,7 @@ from models.User import User
 from models.Mentor import Mentor
 from models.Proposal import Proposal
 from models.Admin import Admin
+from models.ProjectList import ProjectSummaryInput
 from config.database import collection_projects
 from config.database import collection_timeline,collection_mentors,collection_ideas,collection_programs,collection_proposals,collection_progress
 from config.database import collection_users
@@ -506,3 +507,45 @@ async def set_max_project_count(request: Request):
     data = await request.json()
     Admin.max_project_count = data["max_project_count"]
     return {"max_project_count": Admin.max_project_count}
+
+@route.post("/project/summary")
+async def create_project_summary(summary: ProjectSummaryInput):
+    document = {
+        "title": summary.proj_name,
+        "mentors": summary.mentor_name,
+        "linkedin_link": summary.linkedin,
+        "github_link": summary.github
+    }
+
+    result = collection_projects.insert_one(document)   # Mongo auto _id
+
+    # Convert ObjectId → string
+    inserted_id = str(result.inserted_id)
+
+    return {
+        "success": True,
+        "message": "Project summary added successfully",
+        "id": inserted_id
+    }
+
+@route.get("/project/summary")
+async def get_project_summary():
+    projects = list(collection_projects.find({}))
+
+    result = []
+    for proj in projects:
+        _id = proj.get("_id")
+
+        # Convert ObjectId to string
+        if isinstance(_id, ObjectId):
+            _id = str(_id)
+
+        result.append({
+            "id": _id,
+            "proj_name": proj.get("title"),
+            "mentor_name": proj.get("mentors", []),
+            "linkedin": proj.get("linkedin_link", []),
+            "github": proj.get("github_link", [])
+        })
+
+    return result
