@@ -513,6 +513,7 @@ async def create_project_summary(summary: ProjectSummaryInput):
     document = {
         "title": summary.proj_name,
         "mentors": summary.mentor_name,
+        "about":summary.about,
         "linkedin_link": summary.linkedin,
         "github_link": summary.github
     }
@@ -544,6 +545,7 @@ async def get_project_summary():
             "id": _id,
             "proj_name": proj.get("title"),
             "mentor_name": proj.get("mentors", []),
+            "about":proj.get("about",[]),
             "linkedin": proj.get("linkedin_link", []),
             "github": proj.get("github_link", [])
         })
