@@ -37,7 +37,11 @@ async def add_project(request: Request):
     project_id = ''.join(random.choices('0123456789', k=5))
     data["id"] = project_id 
     project = Project(**data)
-    collection_projects.insert_one(project.dict())
+    try:
+        collection_projects.insert_one(project.model_dump())
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
     return {"success": True, "project_id": project_id}
 @route.get("/mentor_projects/{mentorid}", response_model=List[Project])
 async def fetch_projects_by_mentor_id(mentorid: str):
@@ -77,8 +81,8 @@ async def update_project(request:Request):
 async def check_duplicate_username(request: Request):
     data = await request.json()
     existing_user = collection_users.find_one({
-        "first_name": data["first_name"],
-        "last_name": data["last_name"]
+        "first_name": data["first_name"].strip(),
+        "last_name": data["last_name"].strip() # remove trailing white space tho.
     })
 
     if existing_user:
